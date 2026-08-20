@@ -6,7 +6,7 @@ FIXTURE   := $(CONTRACTS)/test/fixtures/ratio_curve.json
 PY        := .venv/bin/python
 
 .PHONY: help build test test-sol test-v test-py parity-fixture parity fmt \
-        snapshot clean anvil venv data model deploy-sepolia
+        snapshot clean anvil venv data model fixtures signer keygen deploy-sepolia
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}'
@@ -19,7 +19,10 @@ parity-fixture: ## Regenerate the Solidity/Python parity fixture from model/risk
 
 test: test-sol test-py ## Run every test, Solidity and Python
 
-test-sol: parity-fixture ## Run the Solidity test suite
+fixtures: ## Regenerate the cross-language signature fixture
+	$(PY) -m signer.fixtures
+
+test-sol: parity-fixture fixtures ## Run the Solidity test suite
 	cd $(CONTRACTS) && forge test
 
 test-v: parity-fixture ## Run the Solidity suite with traces on failure
@@ -38,6 +41,12 @@ data: ## Regenerate the labelled bootstrap dataset (synthetic, clearly marked)
 
 model: data ## Train the model and write model/artifacts/model_report.json
 	$(PY) -m model.train
+
+signer: ## Run the signer service on :8000
+	$(PY) -m signer.cli serve
+
+keygen: ## Generate a development signer key
+	$(PY) -m signer.cli keygen
 
 parity: parity-fixture ## Assert Solidity and Python price every score identically
 	cd $(CONTRACTS) && forge test --match-path "test/RiskParamsParity.t.sol" -vv
