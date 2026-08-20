@@ -3,8 +3,10 @@
 
 CONTRACTS := contracts
 FIXTURE   := $(CONTRACTS)/test/fixtures/ratio_curve.json
+PY        := .venv/bin/python
 
-.PHONY: help build test test-v parity-fixture parity fmt snapshot clean anvil deploy-sepolia
+.PHONY: help build test test-sol test-v test-py parity-fixture parity fmt \
+        snapshot clean anvil venv data model deploy-sepolia
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}'
@@ -15,11 +17,27 @@ build: ## Compile the contracts
 parity-fixture: ## Regenerate the Solidity/Python parity fixture from model/risk_curve.py
 	python3 model/risk_curve.py --dump $(FIXTURE)
 
-test: parity-fixture ## Run the full test suite (regenerates the parity fixture first)
+test: test-sol test-py ## Run every test, Solidity and Python
+
+test-sol: parity-fixture ## Run the Solidity test suite
 	cd $(CONTRACTS) && forge test
 
-test-v: parity-fixture ## Run the full test suite with traces on failure
+test-v: parity-fixture ## Run the Solidity suite with traces on failure
 	cd $(CONTRACTS) && forge test -vv
+
+test-py: ## Run the Python test suite
+	$(PY) -m pytest tests -q
+
+venv: ## Create .venv and install Python dependencies
+	python3 -m venv .venv
+	$(PY) -m pip install --upgrade pip
+	$(PY) -m pip install -r requirements.txt
+
+data: ## Regenerate the labelled bootstrap dataset (synthetic, clearly marked)
+	$(PY) -m model.bootstrap_data
+
+model: data ## Train the model and write model/artifacts/model_report.json
+	$(PY) -m model.train
 
 parity: parity-fixture ## Assert Solidity and Python price every score identically
 	cd $(CONTRACTS) && forge test --match-path "test/RiskParamsParity.t.sol" -vv

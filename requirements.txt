@@ -1,0 +1,22 @@
+# Karma Python dependencies. Install with:
+#     python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+
+# --- model pipeline ---------------------------------------------------------
+numpy>=1.24            # numeric core for the feature matrix
+pandas>=2.0            # CSV ingest and the group-bys in evaluation
+scikit-learn>=1.3      # GradientBoostingClassifier, metrics, train/test split
+joblib>=1.3            # model artifact serialisation
+
+# --- attestation signing ----------------------------------------------------
+eth-account>=0.13      # EIP-712 typed-data signing, independent of our Solidity
+eth-abi>=5.0           # canonical ABI encoding for the feature hash
+eth-utils>=4.0         # keccak and address checksumming
+
+# --- signer service ---------------------------------------------------------
+fastapi>=0.115         # the scoring API
+uvicorn>=0.30          # ASGI server to run it
+pydantic>=2.0          # request/response validation at the API boundary
+httpx>=0.27            # FastAPI's TestClient transport, used by the tests
+
+# --- development ------------------------------------------------------------
+pytest>=8.0            # Python test runner

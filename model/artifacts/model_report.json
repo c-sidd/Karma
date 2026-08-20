@@ -1,0 +1,260 @@
+{
+  "model_version": 1,
+  "trained_at": "2026-08-20T18:29:12+00:00",
+  "algorithm": "GradientBoostingClassifier (log-loss), probabilities used uncalibrated",
+  "hyperparameters": {
+    "n_estimators": 300,
+    "learning_rate": 0.05,
+    "max_depth": 3,
+    "subsample": 0.9,
+    "random_state": 20260820
+  },
+  "data_source": {
+    "kind": "bootstrap",
+    "is_real_data": false,
+    "label": "BOOTSTRAP - SYNTHETIC DATA, NOT REAL ON-CHAIN ACTIVITY",
+    "generator": "model/bootstrap_data.py",
+    "seed": 20260820,
+    "n_rows": 40000,
+    "default_rate": 0.0718,
+    "generated_at": "2026-08-20T18:27:26+00:00",
+    "warning": "Every metric derived from this file describes a simulation. It says nothing about real borrower behaviour.",
+    "file": "model/data/bootstrap_wallets_v1.csv",
+    "n_rows_loaded": 40000
+  },
+  "dataset": {
+    "n_total": 40000,
+    "n_train": 30000,
+    "n_test": 10000,
+    "base_default_rate": 0.0718,
+    "test_size": 0.25
+  },
+  "metrics": {
+    "auc_test": 0.9106,
+    "auc_train": 0.9296,
+    "ks_test": 0.6814,
+    "brier_test": 0.0463
+  },
+  "score_distribution": {
+    "min": 300,
+    "p25": 641,
+    "median": 747,
+    "p75": 806,
+    "max": 855
+  },
+  "score_bands": [
+    {
+      "band": "300-399",
+      "n": 296,
+      "share_of_population": 0.0296,
+      "default_rate": 0.6588,
+      "collateral_ratio_bps": 14674
+    },
+    {
+      "band": "400-499",
+      "n": 540,
+      "share_of_population": 0.054,
+      "default_rate": 0.4074,
+      "collateral_ratio_bps": 14007
+    },
+    {
+      "band": "500-599",
+      "n": 1011,
+      "share_of_population": 0.1011,
+      "default_rate": 0.1691,
+      "collateral_ratio_bps": 13340
+    },
+    {
+      "band": "600-699",
+      "n": 1834,
+      "share_of_population": 0.1834,
+      "default_rate": 0.0469,
+      "collateral_ratio_bps": 12674
+    },
+    {
+      "band": "700-799",
+      "n": 3517,
+      "share_of_population": 0.3517,
+      "default_rate": 0.0108,
+      "collateral_ratio_bps": 12007
+    },
+    {
+      "band": "800-900",
+      "n": 2802,
+      "share_of_population": 0.2802,
+      "default_rate": 0.0029,
+      "collateral_ratio_bps": 11334
+    }
+  ],
+  "calibration_check": [
+    {
+      "decile": 1,
+      "n": 1000,
+      "mean_predicted": 0.00302,
+      "observed": 0.001
+    },
+    {
+      "decile": 2,
+      "n": 1000,
+      "mean_predicted": 0.00398,
+      "observed": 0.002
+    },
+    {
+      "decile": 3,
+      "n": 1000,
+      "mean_predicted": 0.00529,
+      "observed": 0.005
+    },
+    {
+      "decile": 4,
+      "n": 1000,
+      "mean_predicted": 0.0071,
+      "observed": 0.008
+    },
+    {
+      "decile": 5,
+      "n": 1000,
+      "mean_predicted": 0.00997,
+      "observed": 0.009
+    },
+    {
+      "decile": 6,
+      "n": 1000,
+      "mean_predicted": 0.01508,
+      "observed": 0.018
+    },
+    {
+      "decile": 7,
+      "n": 1000,
+      "mean_predicted": 0.02588,
+      "observed": 0.031
+    },
+    {
+      "decile": 8,
+      "n": 1000,
+      "mean_predicted": 0.05057,
+      "observed": 0.052
+    },
+    {
+      "decile": 9,
+      "n": 1000,
+      "mean_predicted": 0.1279,
+      "observed": 0.142
+    },
+    {
+      "decile": 10,
+      "n": 1000,
+      "mean_predicted": 0.48686,
+      "observed": 0.45
+    }
+  ],
+  "band_monotonicity": {
+    "is_monotone_decreasing": true,
+    "bands_compared": 6,
+    "violations": []
+  },
+  "capital_efficiency": {
+    "baseline_ratio_bps": 15000,
+    "baseline_note": "Every borrower posts 150%, which is roughly where Aave v3 sits.",
+    "mean_ratio_bps": 12276.64,
+    "median_ratio_bps": 12020.0,
+    "collateral_freed_pct": 18.16,
+    "borrowing_power_lift_pct": 22.18
+  },
+  "features": [
+    {
+      "name": "wallet_age_days",
+      "description": "Days since the wallet's first on-chain transaction.",
+      "unit": "days",
+      "direction": 1,
+      "scale": 1
+    },
+    {
+      "name": "tx_count_90d",
+      "description": "Transactions in the last 90 days. Distinguishes a live wallet from a dormant one.",
+      "unit": "count",
+      "direction": 1,
+      "scale": 1
+    },
+    {
+      "name": "total_borrow_usd",
+      "description": "Lifetime borrow volume across lending markets, in USD.",
+      "unit": "USD",
+      "direction": 1,
+      "scale": 100
+    },
+    {
+      "name": "repay_to_borrow_ratio",
+      "description": "Lifetime repaid divided by lifetime borrowed. The core repayment signal.",
+      "unit": "ratio",
+      "direction": 1,
+      "scale": 1000000
+    },
+    {
+      "name": "liquidation_count",
+      "description": "Times this wallet has been liquidated. The strongest negative signal.",
+      "unit": "count",
+      "direction": -1,
+      "scale": 1
+    },
+    {
+      "name": "max_leverage_ratio",
+      "description": "Peak debt-to-collateral ever held. How close to the edge this wallet operates.",
+      "unit": "ratio",
+      "direction": -1,
+      "scale": 1000000
+    },
+    {
+      "name": "distinct_assets_borrowed",
+      "description": "Distinct assets borrowed. Breadth of protocol experience.",
+      "unit": "count",
+      "direction": 1,
+      "scale": 1
+    },
+    {
+      "name": "avg_position_duration_days",
+      "description": "Mean days a borrow position stayed open. Separates lenders from flash traders.",
+      "unit": "days",
+      "direction": 1,
+      "scale": 1000
+    }
+  ],
+  "feature_importance": [
+    {
+      "name": "liquidation_count",
+      "importance": 0.7083
+    },
+    {
+      "name": "repay_to_borrow_ratio",
+      "importance": 0.1284
+    },
+    {
+      "name": "max_leverage_ratio",
+      "importance": 0.0751
+    },
+    {
+      "name": "total_borrow_usd",
+      "importance": 0.0324
+    },
+    {
+      "name": "avg_position_duration_days",
+      "importance": 0.0315
+    },
+    {
+      "name": "wallet_age_days",
+      "importance": 0.0141
+    },
+    {
+      "name": "tx_count_90d",
+      "importance": 0.0074
+    },
+    {
+      "name": "distinct_assets_borrowed",
+      "importance": 0.0029
+    }
+  ],
+  "explanation_method": {
+    "kind": "leave-one-out ablation against the training median",
+    "note": "Per-wallet contributions are the score change from replacing one feature with its training median. They are directional and reproducible; they are not SHAP values and do not sum exactly to the distance from the baseline score."
+  }
+}

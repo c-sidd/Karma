@@ -16,6 +16,7 @@ __pycache__/
 *.py[cod]
 .venv/
 venv/
+.pytest_cache/
 
 # Node (from M4)
 node_modules/
@@ -24,3 +25,8 @@ out/
 
 # OS
 .DS_Store
+
+# Regenerable model outputs. `make model` rebuilds both from source.
+# model_report.json is deliberately NOT ignored: it is the evidence.
+model/data/
+model/artifacts/*.joblib
