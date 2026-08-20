@@ -1,0 +1,33 @@
+.masthead {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 26px 0 22px;
+  border-bottom: 1px solid var(--rule-strong);
+}
+
+.figures {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 32px;
+}
+
+.state {
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--ink-muted);
+  max-width: 76ch;
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+@media (max-width: 1180px) {
+  .figures {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+  }
+}

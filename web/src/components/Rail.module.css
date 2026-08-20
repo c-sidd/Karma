@@ -1,0 +1,221 @@
+.rail {
+  grid-area: rail;
+  border-right: 1px solid var(--rule);
+  background: var(--paper-raised);
+  padding: 20px 18px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.brand {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.wordmark {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+}
+
+.tagline {
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--ink-muted);
+}
+
+.block {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.walletRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.metaRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.connect {
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: var(--paper-raised);
+  border-radius: var(--radius);
+  padding: 7px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  text-align: center;
+  transition: background var(--transition);
+}
+
+.connect:hover:not(:disabled) {
+  background: #000;
+}
+
+.connect:disabled {
+  background: var(--paper-sunken);
+  color: var(--ink-faint);
+  border-color: var(--rule);
+}
+
+.quiet {
+  border: 0;
+  background: none;
+  padding: 0;
+  font-size: 11px;
+  color: var(--ink-faint);
+  border-bottom: 1px solid var(--rule-strong);
+  transition: color var(--transition), border-color var(--transition);
+}
+
+.quiet:hover {
+  color: var(--ink);
+  border-bottom-color: var(--ink);
+}
+
+.note {
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--ink-faint);
+}
+
+.errorNote {
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--neg);
+}
+
+.errorNote code {
+  font-size: 10px;
+}
+
+.bootstrapNote {
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--ink-muted);
+  border-left: 2px solid var(--rule-strong);
+  padding-left: 8px;
+  margin-top: 2px;
+}
+
+.chainSwitch {
+  display: flex;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.chip {
+  border: 1px solid var(--rule);
+  background: var(--paper);
+  border-radius: var(--radius);
+  padding: 3px 8px;
+  font-size: 11px;
+  color: var(--ink-muted);
+  transition: border-color var(--transition), color var(--transition);
+}
+
+.chip:hover:not(:disabled) {
+  border-color: var(--ink-faint);
+  color: var(--ink);
+}
+
+.chipActive {
+  border-color: var(--ink);
+  color: var(--ink);
+  background: var(--paper-sunken);
+}
+
+.addresses {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.addressRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.addressLabel {
+  font-size: 11px;
+  color: var(--ink-faint);
+}
+
+.addressValue {
+  margin: 0;
+}
+
+.link {
+  border-bottom: 1px solid var(--rule-strong);
+}
+
+.link:hover {
+  border-bottom-color: var(--ink);
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.navLink {
+  font-size: 12px;
+  color: var(--ink-muted);
+  border: 0;
+  padding: 4px 0;
+  border-left: 2px solid transparent;
+  padding-left: 8px;
+  margin-left: -8px;
+  transition: color var(--transition), border-color var(--transition);
+}
+
+.navLink:hover {
+  color: var(--ink);
+  border-left-color: var(--ink);
+}
+
+.footer {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-top: 16px;
+  border-top: 1px solid var(--rule);
+}
+
+.footerNote {
+  font-size: 10px;
+  color: var(--ink-faint);
+}
+
+@media (max-width: 1100px) {
+  .rail {
+    position: static;
+    height: auto;
+    border-right: 0;
+    border-bottom: 1px solid var(--rule);
+  }
+}

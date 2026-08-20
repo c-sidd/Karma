@@ -1,0 +1,369 @@
+/* The panel that carries the whole argument. Slightly heavier border than its
+   neighbours, and the only place the accent colour is allowed to appear. */
+
+.panel {
+  border-color: var(--rule-strong);
+}
+
+.headTitle {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.headSub {
+  font-size: 11px;
+  color: var(--ink-faint);
+}
+
+/* --- step strip ---------------------------------------------------------- */
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-bottom: 1px solid var(--rule);
+  background: var(--paper-sunken);
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  font-size: 11px;
+  color: var(--ink-faint);
+  border-right: 1px solid var(--rule);
+  transition: color var(--transition), background var(--transition);
+}
+
+.step:last-child {
+  border-right: 0;
+}
+
+.stepDone {
+  color: var(--ink);
+  background: var(--paper-raised);
+}
+
+/* --- body ---------------------------------------------------------------- */
+
+.body {
+  padding: 0;
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.column {
+  padding: 16px;
+  border-right: 1px solid var(--rule);
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.column:last-child {
+  border-right: 0;
+}
+
+/* --- signed payload ------------------------------------------------------ */
+
+.fields td {
+  padding: 6px 10px 6px 0;
+}
+
+.fieldLabel {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 11px;
+  color: var(--ink-muted);
+  white-space: nowrap;
+  width: 96px;
+}
+
+.fieldValue {
+  font-size: 12px;
+}
+
+.fieldValueFull {
+  font-size: 11px;
+  overflow-wrap: anywhere;
+  line-height: 1.4;
+}
+
+.fieldNote {
+  margin-left: 8px;
+  font-size: 10px;
+  color: var(--ink-faint);
+}
+
+/* --- digest construction ------------------------------------------------- */
+
+.construction {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.constructionRow {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.constructionLabel {
+  font-size: 10px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  font-weight: 500;
+}
+
+.domain {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  border-left: 2px solid var(--rule-strong);
+  padding-left: 9px;
+}
+
+.constructionNote {
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--ink-muted);
+}
+
+.hashRow {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.hashHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hashValue {
+  display: block;
+  font-size: 11px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+  padding: 6px 8px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--paper-sunken);
+  transition: border-color var(--transition), color var(--transition);
+}
+
+.hashPos {
+  border-color: var(--pos);
+  color: var(--pos);
+  background: var(--pos-wash);
+}
+
+.hashNeg {
+  border-color: var(--neg);
+  color: var(--neg);
+  background: var(--neg-wash);
+}
+
+.formula {
+  padding: 6px 8px;
+  border-left: 2px solid var(--accent-line);
+  background: var(--accent-wash);
+}
+
+/* --- recovery ------------------------------------------------------------ */
+
+.recovery {
+  border-top: 1px solid var(--rule);
+}
+
+.recoveryGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.recoveryCell {
+  padding: 14px 16px;
+  border-right: 1px solid var(--rule);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.recoveryCell:last-child {
+  border-right: 0;
+}
+
+.recoveryValue {
+  min-width: 0;
+}
+
+.revert {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--neg);
+  background: var(--neg-wash);
+}
+
+.revertNote {
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--ink-muted);
+  max-width: 62ch;
+}
+
+/* --- controls ------------------------------------------------------------ */
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 14px 16px;
+  border-top: 1px solid var(--rule);
+  background: var(--paper-sunken);
+}
+
+/* --- tamper result ------------------------------------------------------- */
+
+.tamperOk,
+.tamperBad {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 16px;
+  border-top: 1px solid var(--rule);
+}
+
+.tamperOk {
+  border-top-color: var(--neg);
+  background: var(--neg-wash);
+}
+
+.tamperBad {
+  border-top-color: var(--rule-strong);
+  background: var(--paper-sunken);
+}
+
+.tamperHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.tamperTitle {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.tamperBody {
+  font-size: 11px;
+  line-height: 1.55;
+  color: var(--ink-muted);
+  max-width: 74ch;
+}
+
+.tamperGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 260px));
+  gap: 20px;
+  padding-top: 4px;
+}
+
+/* --- transaction --------------------------------------------------------- */
+
+.tx {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 16px;
+  border-top: 1px solid var(--rule);
+}
+
+/* --- empty --------------------------------------------------------------- */
+
+.empty {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 28px;
+  align-items: start;
+  padding: 22px 16px;
+}
+
+.emptyCopy {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 68ch;
+}
+
+.emptyLead {
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.emptyDetail {
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--ink-muted);
+}
+
+.emptyActions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.emptyError {
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--neg);
+  max-width: 34ch;
+  text-align: right;
+}
+
+@media (max-width: 1180px) {
+  .columns {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .column {
+    border-right: 0;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .recoveryGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .recoveryCell {
+    border-right: 0;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .empty {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .emptyActions {
+    align-items: flex-start;
+  }
+
+  .emptyError {
+    text-align: left;
+  }
+}

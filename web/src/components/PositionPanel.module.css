@@ -1,0 +1,92 @@
+.empty {
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--ink-muted);
+  max-width: 74ch;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 340px) minmax(0, 1fr);
+  gap: 28px;
+}
+
+.readout {
+  display: flex;
+  flex-direction: column;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  border-left: 1px solid var(--rule);
+  padding-left: 24px;
+}
+
+.gate {
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--ink-muted);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  max-width: 70ch;
+}
+
+.action {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.controlRow {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.input {
+  width: 120px;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius);
+  background: var(--paper-raised);
+  padding: 6px 8px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+  transition: border-color var(--transition);
+}
+
+.input:focus {
+  border-color: var(--ink);
+}
+
+.hint {
+  font-size: 10px;
+  color: var(--ink-faint);
+}
+
+.tx,
+.error {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--rule);
+  flex-wrap: wrap;
+}
+
+@media (max-width: 1180px) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .actions {
+    border-left: 0;
+    padding-left: 0;
+    border-top: 1px solid var(--rule);
+    padding-top: 16px;
+  }
+}
