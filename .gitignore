@@ -1,0 +1,26 @@
+# Secrets. The signing key never enters the repository.
+.env
+.env.*
+!.env.example
+
+# Foundry
+contracts/out/
+contracts/cache/
+# Broadcast logs are machine-local and carry per-run transaction data.
+contracts/broadcast/
+# Local anvil deployments. Real networks (e.g. 11155111.json) stay tracked.
+contracts/deployments/31337.json
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Node (from M4)
+node_modules/
+.next/
+out/
+
+# OS
+.DS_Store
