@@ -4,7 +4,7 @@
 CONTRACTS := contracts
 FIXTURE   := $(CONTRACTS)/test/fixtures/ratio_curve.json
 
-.PHONY: help build test test-v parity-fixture parity fmt snapshot clean anvil
+.PHONY: help build test test-v parity-fixture parity fmt snapshot clean anvil deploy-sepolia
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}'
@@ -35,3 +35,7 @@ clean: ## Remove build artifacts
 
 anvil: ## Run a local chain on :8545
 	anvil
+
+deploy-sepolia: ## Deploy to Sepolia (needs .env: DEPLOYER_PRIVATE_KEY, MODEL_SIGNER_ADDRESS, SEPOLIA_RPC_URL)
+	cd $(CONTRACTS) && forge script script/Deploy.s.sol:Deploy \
+		--rpc-url $${SEPOLIA_RPC_URL} --broadcast --verify -vvvv
