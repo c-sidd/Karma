@@ -73,4 +73,16 @@ contract GuardianTest is KarmaFixture {
         vm.expectRevert(Guardian.NotGuardian.selector);
         guardian.pause();
     }
+
+    function test_pauseStopsBorrowAcrossProtocol() public {
+        fundCollateral(alice, 10 ether);
+        attest(alice, 800);
+
+        vm.prank(owner);
+        guardian.pause();
+
+        vm.prank(alice);
+        vm.expectRevert(abi.encodeWithSignature("ProtocolPaused()"));
+        pool.borrow(1_000e6);
+    }
 }
