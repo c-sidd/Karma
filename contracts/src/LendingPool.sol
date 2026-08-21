@@ -7,25 +7,8 @@ import {IPriceOracle} from "./interfaces/IPriceOracle.sol";
 import {IRiskParams} from "./interfaces/IRiskParams.sol";
 import {IScoreOracle} from "./interfaces/IScoreOracle.sol";
 
-/// @title  LendingPool
+/// @title LendingPool
 /// @notice Single-collateral, single-debt-asset pool priced by credit score.
-///
-/// @dev The load-bearing line in this contract is in borrow():
-///
-///          uint16 score = scoreOracle.requireValidScore(msg.sender);
-///
-///      requireValidScore reverts unless ScoreOracle holds a record it produced by
-///      recovering a registered model signer's ECDSA signature. There is no other
-///      way into the ratio lookup, no owner override, no default score, and no
-///      branch that prices a loan when that call fails.
-///
-///      Health checks outside borrow() (withdrawCollateral, liquidate) fall back to
-///      the worst ratio on the curve when an attestation is missing or expired.
-///      Falling back conservatively is safe there; falling back at all in borrow()
-///      would not be, because it would let an unscored wallet borrow.
-///
-///      Out of scope for M1, deliberately: lender-side share accounting. Liquidity is
-///      funded by the owner via fund(); accrued interest stays in the pool as reserves.
 contract LendingPool is Guarded {
     error ZeroAmount();
     error InsufficientCollateral();
@@ -37,13 +20,13 @@ contract LendingPool is Guarded {
     error Reentrancy();
     error TransferFailed();
     error RateTooHigh();
+    error InsufficientReserves();
+    error InvalidPrice();
 
     uint256 public constant BPS = 10_000;
     uint256 public constant WAD = 1e18;
     uint256 public constant PRICE_SCALE = 1e8;
-    /// @notice Fraction of a position a single liquidation may repay.
     uint256 public constant CLOSE_FACTOR_BPS = 5_000;
-    /// @notice Ceiling on the governable borrow rate: 100% APR.
     uint256 public constant MAX_RATE_PER_SECOND_WAD = uint256(1e18) / 365 days;
 
     IERC20 public immutable collateralAsset;
@@ -61,9 +44,9 @@ contract LendingPool is Guarded {
     uint256 public totalScaledDebt;
     uint256 public borrowIndex = WAD;
     uint64 public lastAccrualTime;
-    uint256 public ratePerSecondWad = uint256(5e16) / 365 days; // 5% APR
+    uint256 public ratePerSecondWad = uint256(5e16) / 365 days;
     uint256 public maxBorrowPerWallet;
-    uint256 public liquidationBonusBps = 500; // 5%
+    uint256 public liquidationBonusBps = 500;
 
     uint256 private _entered;
 
@@ -111,11 +94,6 @@ contract LendingPool is Guarded {
         lastAccrualTime = uint64(block.timestamp);
     }
 
-    // ------------------------------------------------------------ interest
-
-    /// @dev Linear accrual over the elapsed period. Not continuously compounded:
-    ///      simpler to reason about and to mirror off-chain, and the difference is
-    ///      immaterial at testnet rates.
     function accrue() public {
         uint256 dt = block.timestamp - lastAccrualTime;
         if (dt == 0) return;
@@ -125,14 +103,11 @@ contract LendingPool is Guarded {
         lastAccrualTime = uint64(block.timestamp);
     }
 
-    /// @notice Borrow index as it would stand right now, without writing storage.
     function currentBorrowIndex() public view returns (uint256) {
         uint256 dt = block.timestamp - lastAccrualTime;
         if (dt == 0 || totalScaledDebt == 0 || ratePerSecondWad == 0) return borrowIndex;
         return borrowIndex + (borrowIndex * ratePerSecondWad * dt) / WAD;
     }
-
-    // ------------------------------------------------------------ user actions
 
     function depositCollateral(uint256 amount) external nonReentrant whenNotPaused {
         if (amount == 0) revert ZeroAmount();
@@ -151,8 +126,6 @@ contract LendingPool is Guarded {
 
         uint256 debt = debtOf(msg.sender);
         if (debt != 0) {
-            // Conservative on purpose: an expired attestation prices the check at the
-            // worst ratio on the curve rather than letting collateral walk out.
             uint256 ratioBps = _borrowRatioBpsOrWorst(msg.sender);
             if (_debtUsd(debt) * ratioBps > _collateralUsd(remaining) * BPS) {
                 revert InsufficientCollateral();
@@ -164,14 +137,10 @@ contract LendingPool is Guarded {
         emit CollateralWithdrawn(msg.sender, amount);
     }
 
-    /// @notice Borrow `amount` of the debt asset against deposited collateral.
-    /// @dev Reverts with ScoreOracle.NoAttestation() / AttestationExpired() /
-    ///      StaleModelVersion() for any wallet without a live verified score.
     function borrow(uint256 amount) external nonReentrant whenNotPaused {
         if (amount == 0) revert ZeroAmount();
         accrue();
 
-        // The only source of a score. No fallback, no override.
         uint16 score = scoreOracle.requireValidScore(msg.sender);
         uint256 ratioBps = riskParams.collateralRatioBps(score);
 
@@ -203,7 +172,6 @@ contract LendingPool is Guarded {
         emit Repaid(onBehalfOf, msg.sender, paid);
     }
 
-    /// @notice Repay part of an unhealthy position and seize collateral at a bonus.
     function liquidate(address user, uint256 repayAmount) external nonReentrant whenNotPaused {
         if (repayAmount == 0) revert ZeroAmount();
         accrue();
@@ -227,8 +195,6 @@ contract LendingPool is Guarded {
         emit Liquidated(user, msg.sender, repayAmount, seize);
     }
 
-    // ------------------------------------------------------------ views
-
     function debtOf(address user) public view returns (uint256) {
         uint256 scaled = _scaledDebtOf[user];
         if (scaled == 0) return 0;
@@ -239,16 +205,12 @@ contract LendingPool is Guarded {
         return _scaledDebtOf[user];
     }
 
-    /// @notice Collateralisation of `user` in bps. type(uint256).max when debt-free.
     function currentRatioBps(address user) public view returns (uint256) {
         uint256 debt = debtOf(user);
         if (debt == 0) return type(uint256).max;
         return (_collateralUsd(collateralOf[user]) * BPS) / _debtUsd(debt);
     }
 
-    /// @notice Largest additional borrow `user` could take right now, in debt units.
-    /// @dev Returns 0 rather than reverting when there is no valid attestation, so a
-    ///      UI can render the state without a try/catch.
     function maxBorrowable(address user) external view returns (uint256) {
         (uint16 score, bool valid) = scoreOracle.scoreOf(user);
         if (!valid) return 0;
@@ -257,7 +219,8 @@ contract LendingPool is Guarded {
         uint256 debtUsd = _debtUsd(debtOf(user));
         if (capacityUsd <= debtUsd) return 0;
 
-        uint256 headroom = ((capacityUsd - debtUsd) * _debtUnit) / _price(address(debtAsset));
+        uint256 debtPrice = _price(address(debtAsset));
+        uint256 headroom = ((capacityUsd - debtUsd) * _debtUnit) / debtPrice;
         uint256 cap = maxBorrowPerWallet;
         uint256 debt = debtOf(user);
         uint256 capHeadroom = debt >= cap ? 0 : cap - debt;
@@ -273,8 +236,6 @@ contract LendingPool is Guarded {
         return currentRatioBps(user) < _liquidationRatioBpsOrWorst(user);
     }
 
-    /// @notice Distance to liquidation in bps: current ratio minus the liquidation
-    ///         ratio. Negative distance is reported as 0, i.e. already liquidatable.
     function liquidationDistanceBps(address user) external view returns (uint256) {
         uint256 debt = debtOf(user);
         if (debt == 0) return type(uint256).max;
@@ -291,16 +252,24 @@ contract LendingPool is Guarded {
         return _divUp(totalScaledDebt * currentBorrowIndex(), WAD);
     }
 
-    // ------------------------------------------------------------ governance
-
     function fund(uint256 amount) external onlyOwner {
         if (amount == 0) revert ZeroAmount();
         _pull(debtAsset, msg.sender, amount);
         emit Funded(amount);
     }
 
+    /// @notice Withdraw pool liquidity without taking the pool below outstanding principal.
+    /// @dev Interest remains available as protocol reserves, while borrowed principal stays protected.
     function defund(uint256 amount) external onlyOwner {
         if (amount == 0) revert ZeroAmount();
+        accrue();
+
+        uint256 balance = debtAsset.balanceOf(address(this));
+        uint256 outstandingPrincipal = (totalScaledDebt * WAD) / borrowIndex;
+        if (amount > balance || balance - amount < outstandingPrincipal) {
+            revert InsufficientReserves();
+        }
+
         _push(debtAsset, msg.sender, amount);
         emit Defunded(amount);
     }
@@ -329,8 +298,6 @@ contract LendingPool is Guarded {
         emit LiquidationBonusSet(bonusBps);
     }
 
-    // ------------------------------------------------------------ internals
-
     function _burnDebt(address user, uint256 paid, uint256 currentDebt) private {
         uint256 scaled = _scaledDebtOf[user];
         uint256 scaledDelta = paid >= currentDebt ? scaled : (paid * WAD) / borrowIndex;
@@ -350,10 +317,11 @@ contract LendingPool is Guarded {
     }
 
     function _price(address asset) private view returns (uint256) {
-        return priceOracle.priceOf(asset);
+        uint256 price = priceOracle.priceOf(asset);
+        if (price == 0) revert InvalidPrice();
+        return price;
     }
 
-    /// @return USD value scaled to PRICE_SCALE (1e8).
     function _collateralUsd(uint256 amount) private view returns (uint256) {
         return (amount * _price(address(collateralAsset))) / _collateralUnit;
     }
@@ -375,7 +343,6 @@ contract LendingPool is Guarded {
         _check(address(token), abi.encodeCall(IERC20.transfer, (to, amount)));
     }
 
-    /// @dev Tolerates tokens that return nothing instead of a bool.
     function _check(address token, bytes memory data) private {
         (bool ok, bytes memory ret) = token.call(data);
         if (!ok || (ret.length != 0 && !abi.decode(ret, (bool)))) revert TransferFailed();
