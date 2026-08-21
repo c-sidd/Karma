@@ -1,0 +1,4 @@
+The deploy script writes <chainId>.json here.
+
+Local chain deployments (31337) are gitignored; real networks are committed so
+the frontend and signer service can find the addresses from a clean checkout.

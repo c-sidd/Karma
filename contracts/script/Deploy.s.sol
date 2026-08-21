@@ -122,6 +122,14 @@ contract Deploy is Script {
         vm.serializeAddress(key, "modelSigner", d.modelSigner);
         string memory json = vm.serializeBytes32(key, "domainSeparator", d.scoreOracle.DOMAIN_SEPARATOR());
 
+        // A fresh clone has no deployments directory: git cannot track an empty
+        // one, and the only file that would live there is gitignored for local
+        // chains. Create it rather than failing after the contracts are already
+        // deployed and the addresses exist only in this log.
+        if (!vm.isDir("./deployments")) {
+            vm.createDir("./deployments", true);
+        }
+
         string memory path = string.concat("./deployments/", vm.toString(block.chainid), ".json");
         vm.writeJson(json, path);
         console2.log("wrote", path);
