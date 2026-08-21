@@ -106,6 +106,16 @@ def test_calldata_is_ready_to_broadcast(client):
     assert body["to"] == ORACLE
 
 
+def test_nonce_survives_a_javascript_json_parse(client):
+    """A browser parses JSON numbers as doubles, which would round a 96-bit
+    nonce and break the digest. The API sends it as a decimal string."""
+    body = client.post("/score", json={"address": WALLET}).json()
+    nonce = body["attestation"]["nonce"]
+    assert isinstance(nonce, str)
+    assert str(int(nonce)) == nonce
+    assert int(nonce) > 2**53, "test is meaningless if the nonce fits in a double"
+
+
 def test_two_scores_use_different_nonces(client):
     a = client.post("/score", json={"address": WALLET}).json()
     b = client.post("/score", json={"address": WALLET}).json()

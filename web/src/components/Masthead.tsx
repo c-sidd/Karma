@@ -1,7 +1,13 @@
 "use client";
 
 import { bpsToPercent, formatUnits } from "@/lib/format";
-import { useOnChainScore, usePosition, useProtocolState, useRiskCurve } from "@/lib/karma";
+import {
+  useCollateralRatio,
+  useOnChainScore,
+  usePosition,
+  useProtocolState,
+  useRiskCurve,
+} from "@/lib/karma";
 import type { ScoreResponse } from "@/lib/signer";
 
 import { Figure, Mono, Tag } from "./Primitives";
@@ -27,6 +33,10 @@ export function Masthead({
   const curve = useRiskCurve();
 
   const hasOnChainScore = onChain.hasAttestation && onChain.valid;
+  // Priced by the contract, not by the service. This is also what keeps the
+  // figure correct for a wallet attested in an earlier session, where there is
+  // no service response on screen at all.
+  const onChainRatio = useCollateralRatio(hasOnChainScore ? onChain.score : undefined);
 
   if (!address) {
     return (
@@ -81,14 +91,20 @@ export function Masthead({
         <Figure
           label="Collateral ratio"
           value={
-            hasOnChainScore
-              ? bpsToPercent(scored?.collateral_ratio_bps ?? 0)
+            hasOnChainScore && onChainRatio.data !== undefined
+              ? bpsToPercent(onChainRatio.data as bigint)
               : scored
                 ? bpsToPercent(scored.collateral_ratio_bps)
                 : "—"
           }
           tone={hasOnChainScore ? "ink" : "faint"}
-          hint={hasOnChainScore ? "priced by RiskParams from the stored score" : "indicative"}
+          hint={
+            hasOnChainScore
+              ? "priced by RiskParams from the stored score"
+              : scored
+                ? "indicative, not yet accepted on chain"
+                : "no attestation yet"
+          }
         />
         <Figure
           label="Borrowing power"

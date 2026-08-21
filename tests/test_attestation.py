@@ -114,3 +114,21 @@ def test_committed_fixture_still_verifies():
 def test_nonce_zero_deployer_only():
     with pytest.raises(ValueError):
         create_address("0x" + "11" * 20, 1)
+
+
+def test_nonce_is_serialised_as_a_string():
+    """96-bit nonces do not survive a JSON number round trip in a browser."""
+    att = _att(nonce=13_276_536_813_223_630_746_910_045_674)
+    payload = att.as_dict()
+    assert isinstance(payload["nonce"], str)
+    assert payload["nonce"] == "13276536813223630746910045674"
+    assert int(payload["nonce"]) == att.nonce
+
+
+def test_nonce_would_lose_precision_as_a_json_number():
+    """Guards the reason the field is a string, so nobody 'simplifies' it back."""
+    import json
+
+    nonce = 13_276_536_813_223_630_746_910_045_674
+    as_number = json.loads(json.dumps({"nonce": nonce}), parse_int=float)["nonce"]
+    assert int(as_number) != nonce, "if this ever passes, the string is no longer needed"

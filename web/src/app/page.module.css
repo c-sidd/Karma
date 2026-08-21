@@ -1,0 +1,44 @@
+/* Dense rail, wide working area. Deliberately asymmetric: the content column
+   is never centred and never capped to a narrow measure. */
+
+.shell {
+  display: grid;
+  grid-template-areas: "rail work";
+  grid-template-columns: var(--rail-width) minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.work {
+  grid-area: work;
+  padding: 0 32px 56px;
+  min-width: 0;
+  max-width: 1560px;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  padding-top: 22px;
+}
+
+.footer {
+  margin-top: 32px;
+  padding-top: 14px;
+  border-top: 1px solid var(--rule);
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--ink-faint);
+  max-width: 92ch;
+}
+
+@media (max-width: 1100px) {
+  .shell {
+    grid-template-areas: "rail" "work";
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .work {
+    padding: 0 20px 40px;
+  }
+}

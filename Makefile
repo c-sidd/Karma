@@ -6,7 +6,8 @@ FIXTURE   := $(CONTRACTS)/test/fixtures/ratio_curve.json
 PY        := .venv/bin/python
 
 .PHONY: help build test test-sol test-v test-py parity-fixture parity fmt \
-        snapshot clean anvil venv data model fixtures signer keygen deploy-sepolia
+        snapshot clean anvil venv data model fixtures signer keygen \
+        web web-sync web-install web-build web-check deploy-sepolia
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}'
@@ -44,6 +45,21 @@ model: data ## Train the model and write model/artifacts/model_report.json
 
 signer: ## Run the signer service on :8000
 	$(PY) -m signer.cli serve
+
+web-sync: build ## Regenerate the frontend's ABIs and addresses from Foundry output
+	node scripts/sync-contracts.mjs
+
+web-install: ## Install frontend dependencies
+	cd web && npm install
+
+web: web-sync ## Run the frontend dev server on :3000
+	cd web && npm run dev
+
+web-build: web-sync ## Production build of the frontend
+	cd web && npm run build
+
+web-check: ## Typecheck the frontend
+	cd web && npx tsc --noEmit
 
 keygen: ## Generate a development signer key
 	$(PY) -m signer.cli keygen

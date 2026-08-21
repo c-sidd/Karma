@@ -55,7 +55,18 @@ class Attestation:
     nonce: int
 
     def as_dict(self) -> dict:
-        return asdict(self)
+        """JSON-safe form.
+
+        The nonce is 96 bits and JSON numbers are IEEE 754 doubles, so a
+        JavaScript client silently rounds it: 13276536813223630746910045674
+        parses back as 1.3276536813223632e+28. The signature covers the exact
+        value, so a rounded nonce produces a different digest and the contract
+        rejects a perfectly good attestation with BadSigner(). It goes over the
+        wire as a decimal string.
+        """
+        out = asdict(self)
+        out["nonce"] = str(self.nonce)
+        return out
 
     def as_message(self) -> dict:
         return {

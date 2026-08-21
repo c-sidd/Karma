@@ -162,6 +162,20 @@ export function usePosition(address?: `0x${string}`) {
   };
 }
 
+/** Price a score through RiskParams on chain, rather than trusting the service's
+ *  copy of the same curve. Also the only source of a ratio for a wallet whose
+ *  score was attested in an earlier session. */
+export function useCollateralRatio(score?: number) {
+  const { deployment } = useDeployment();
+  return useReadContract({
+    address: deployment?.RiskParams,
+    abi: riskparamsAbi,
+    functionName: "collateralRatioBps",
+    args: score !== undefined ? [score] : undefined,
+    query: { enabled: Boolean(deployment?.RiskParams && score !== undefined && score >= 300) },
+  });
+}
+
 /** Whether the oracle recognises an address as a model signer. */
 export function useIsModelSigner(signer?: `0x${string}`) {
   const { deployment } = useDeployment();
